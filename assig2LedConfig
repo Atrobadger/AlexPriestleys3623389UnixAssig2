@@ -1,0 +1,72 @@
+#!/bin/bash
+
+echo
+echo "Welcome to the LED Configurator"
+echo "================================="
+sysEvent(){
+echo "Associate LED With A System Event"
+echo "================================="
+echo "Available Events Are: "
+echo "---------------------"
+select ledEvent in $(cat /sys/class/leds/$ledSelect/trigger) Quit
+do
+  for i in $(cat /sys/class/leds/$ledSelect/trigger)
+  do
+    if [[ $ledEvent = $i ]]
+    then
+      echo $ledEvent > /sys/class/leds/$ledSelect/trigger
+      echo "$ledEvent active"
+    fi
+  done
+  break
+  if [[ $ledEvent == "Quit" ]]
+  then
+    break
+  fi
+done
+}
+
+selectLed(){
+echo "Modify the led for $selection"
+ledDone=false
+while [ $ledDone = false ]
+  do
+  echo "1: Turn on LED"
+  echo "2: Turn off LED"
+  echo "3: Associate LED With System Event"
+  echo ""
+  echo "4: Quit"
+  read ledMod
+  if [[ $ledMod == 1 ]]
+  then
+    echo 1 > /sys/class/leds/$ledSelect/brightness
+  elif [[ $ledMod == 2 ]]
+  then
+    echo 0 > /sys/class/leds/$ledSelect/brightness
+  elif [[ $ledMod == 3 ]]
+  then
+    sysEvent
+  elif [[ $ledMod == 4 ]] 
+  then
+    ledDone=true
+    break
+  fi
+  done
+}
+PS3="Enter a selection: "
+select ledSelect in $(ls /sys/class/leds) Quit
+do 
+  for i in $(ls /sys/class/leds)
+    do
+    if [[ $ledSelect = $i ]]
+    then
+      selectLed
+    fi
+    done
+  if [[ $ledSelect == "Quit" ]]
+  then
+    break
+  fi
+done
+echo "$ledSelect has been selected"
+
