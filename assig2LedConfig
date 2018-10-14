@@ -1,13 +1,11 @@
 #!/bin/bash
 
-echo
-echo "Welcome to the LED Configurator"
-echo "================================="
 sysEvent(){
 echo "Associate LED With A System Event"
 echo "================================="
 echo "Available Events Are: "
 echo "---------------------"
+PS3="Enter a selection: "
 select ledEvent in $(cat /sys/class/leds/$ledSelect/trigger) Quit
 do
   for i in $(cat /sys/class/leds/$ledSelect/trigger)
@@ -16,18 +14,21 @@ do
     then
       echo $ledEvent > /sys/class/leds/$ledSelect/trigger
       echo "$ledEvent active"
+      selectLed
+      break
     fi
   done
   break
   if [[ $ledEvent == "Quit" ]]
   then
+    selectLed
     break
   fi
 done
 }
 
 selectLed(){
-echo "Modify the led for $selection"
+echo "Modify the led $ledSelect"
 ledDone=false
 while [ $ledDone = false ]
   do
@@ -46,13 +47,19 @@ while [ $ledDone = false ]
   elif [[ $ledMod == 3 ]]
   then
     sysEvent
+    break
   elif [[ $ledMod == 4 ]] 
   then
+    mainMenu
     ledDone=true
     break
   fi
   done
 }
+mainMenu(){
+echo
+echo "Welcome to the LED Configurator"
+echo "================================="
 PS3="Enter a selection: "
 select ledSelect in $(ls /sys/class/leds) Quit
 do 
@@ -61,6 +68,7 @@ do
     if [[ $ledSelect = $i ]]
     then
       selectLed
+      break
     fi
     done
   if [[ $ledSelect == "Quit" ]]
@@ -69,4 +77,5 @@ do
   fi
 done
 echo "$ledSelect has been selected"
-
+}
+mainMenu
