@@ -1,18 +1,20 @@
 #!/bin/bash
 
+#Function for handling association between LEDs and Events
 sysEvent(){
+echo
 echo "Associate LED With A System Event"
 echo "================================="
 echo "Available Events Are: "
 echo "---------------------"
-PS3="Enter a selection: "
-select ledEvent in $(cat /sys/class/leds/$ledSelect/trigger) Quit
+#Lists triggers
+select ledEvent in $(cat /sys/class/leds/$ledChoice/trigger) Quit
 do
-  for i in $(cat /sys/class/leds/$ledSelect/trigger)
+  for i in $(cat /sys/class/leds/$ledChoice/trigger)
   do
     if [[ $ledEvent = $i ]]
     then
-      echo $ledEvent > /sys/class/leds/$ledSelect/trigger
+      echo $ledEvent > /sys/class/leds/$ledChoice/trigger
       echo "$ledEvent active"
       selectLed
       break
@@ -28,26 +30,33 @@ done
 }
 
 selectLed(){
-echo "Modify the led $ledSelect"
+echo
+echo "Modify the led $ledChoice"
 ledDone=false
 while [ $ledDone = false ]
   do
   echo "1: Turn on LED"
   echo "2: Turn off LED"
   echo "3: Associate LED With System Event"
-  echo ""
+  #Don't have time to implement task 6 but I'll chuck some code in
+  #echo "4. Associate LED With A Process/Performance"
   echo "4: Quit"
   read ledMod
+  #Acts depending on decision
   if [[ $ledMod == 1 ]]
   then
-    echo 1 > /sys/class/leds/$ledSelect/brightness
+    echo 1 > /sys/class/leds/$ledChoice/brightness
   elif [[ $ledMod == 2 ]]
   then
-    echo 0 > /sys/class/leds/$ledSelect/brightness
+    echo 0 > /sys/class/leds/$ledChoice/brightness
   elif [[ $ledMod == 3 ]]
   then
     sysEvent
     break
+  #elif [[ $ledMod == 4 ]]
+  #then
+  #processAssoc
+  #break
   elif [[ $ledMod == 4 ]] 
   then
     mainMenu
@@ -56,26 +65,32 @@ while [ $ledDone = false ]
   fi
   done
 }
+#processAssoc(){
+# This is where task 6 would be
+# Something to do with using ps to get processes and then picking one, altering LED brightness
+# either going through ps -aupi and piping it into a search or using ps -C
+
 mainMenu(){
 echo
 echo "Welcome to the LED Configurator"
 echo "================================="
 PS3="Enter a selection: "
-select ledSelect in $(ls /sys/class/leds) Quit
+#
+select ledChoice in $(ls /sys/class/leds) Quit
 do 
   for i in $(ls /sys/class/leds)
     do
-    if [[ $ledSelect = $i ]]
+    if [[ $ledChoice = $i ]]
     then
       selectLed
       break
     fi
     done
-  if [[ $ledSelect == "Quit" ]]
+  if [[ $ledChoice == "Quit" ]]
   then
     break
   fi
 done
-echo "$ledSelect has been selected"
+echo "$ledChoice has been selected"
 }
 mainMenu
